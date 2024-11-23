@@ -10,7 +10,7 @@ from dataset import UrduEmotionDataset, collate_fn
 def main():
     # Configuration
     data_path = 'raw_data'
-    batch_size = 32
+    batch_size = 2  # Reduced for testing
     num_epochs = 50
     val_split = 0.2  # 20% for validation
     
@@ -107,8 +107,9 @@ def main():
     # 6. Train model
     print("\nStarting training...")
     try:
-        train_model(model, train_loader, val_loader, num_epochs=num_epochs)
-        print("Training completed successfully!")
+        # Set debug=True to run checks without full training
+        train_model(model, train_loader, val_loader, num_epochs=num_epochs, debug=True)
+        print("Debug checks completed successfully!")
     except Exception as e:
         print(f"\nError during training: {str(e)}")
         import traceback

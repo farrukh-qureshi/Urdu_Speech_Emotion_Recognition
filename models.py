@@ -114,17 +114,21 @@ class WaveformAdapter(nn.Module):
         self.mask_embedding = nn.Parameter(torch.FloatTensor(hidden_size).uniform_())
         
     def forward(self, x, apply_mask=True):
-        if apply_mask:
-            # Apply time masking
-            mask = torch.bernoulli(torch.full(x.shape[:-1], self.mask_time_prob))
-            mask = self._expand_mask(mask)
-            x = torch.where(mask, self.mask_embedding, x)
+        if apply_mask and self.training:  # Only apply masking during training
+            # Generate mask: [batch_size, time]
+            mask = torch.bernoulli(
+                torch.full(x.shape[:-1], self.mask_time_prob, device=x.device)
+            )
+            # Convert to boolean
+            mask = mask.bool()
+            
+            # Expand mask for broadcasting
+            mask = mask.unsqueeze(-1).expand(-1, -1, self.hidden_size)
+            
+            # Apply masking
+            x = torch.where(mask, self.mask_embedding.expand_as(x), x)
         
         return self.proj(x)
-    
-    def _expand_mask(self, mask):
-        expanded = mask.unsqueeze(-1).expand(-1, -1, self.hidden_size)
-        return expanded
 
 # Main Model
 class UrduClinicalEmotionTransformer(nn.Module):
@@ -157,6 +161,10 @@ class UrduClinicalEmotionTransformer(nn.Module):
         
         # Layer norm for input
         self.input_norm = nn.LayerNorm(512)
+        
+        # Ensure all parameters require gradients
+        for param in self.parameters():
+            param.requires_grad = True
     
     def forward(self, x):
         # x shape: [batch_size, channels, mel_bins, time]
