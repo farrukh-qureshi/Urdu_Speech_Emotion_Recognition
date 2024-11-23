@@ -4,8 +4,11 @@ from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR
 from tqdm import tqdm
 import torch.nn as nn
+import os
 
 def save_checkpoint(model, optimizer, epoch, loss, path):
+    # Create directory if it doesn't exist
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     torch.save({
         'epoch': epoch,
         'model_state_dict': model.state_dict(),
@@ -59,7 +62,6 @@ def train_model(model, train_loader, val_loader, num_epochs=50, debug=True):
             print("Optimizer step successful!")
             
             print("\nAll debug checks passed successfully!")
-            return
             
         except Exception as e:
             print(f"\nDebug check failed: {str(e)}")
@@ -68,10 +70,11 @@ def train_model(model, train_loader, val_loader, num_epochs=50, debug=True):
             traceback.print_exc()
             return
     
-    # Initialize optimizer and scheduler
+    print("\nStarting actual training...")
+    
+    # Initialize optimizer and scheduler for actual training
     optimizer = AdamW(model.parameters(), lr=1e-4, weight_decay=0.01)
     scheduler = CosineAnnealingLR(optimizer, T_max=num_epochs)
-    criterion = nn.CrossEntropyLoss()
     
     # Training loop
     best_val_loss = float('inf')
@@ -83,12 +86,13 @@ def train_model(model, train_loader, val_loader, num_epochs=50, debug=True):
         train_correct = 0
         train_total = 0
         
-        for batch_idx, (data, target) in enumerate(tqdm(train_loader)):
+        train_pbar = tqdm(train_loader, desc=f'Training Epoch {epoch+1}/{num_epochs}')
+        for batch_idx, (data, target) in enumerate(train_pbar):
             data, target = data.to(device), target.to(device)
             
             optimizer.zero_grad()
             output = model(data)
-            loss = F.cross_entropy(output, target)
+            loss = criterion(output, target)
             
             loss.backward()
             optimizer.step()
@@ -98,20 +102,72 @@ def train_model(model, train_loader, val_loader, num_epochs=50, debug=True):
             train_total += target.size(0)
             train_correct += predicted.eq(target).sum().item()
             
+            # Update progress bar
+            train_pbar.set_postfix({
+                'loss': f'{train_loss/(batch_idx+1):.4f}',
+                'acc': f'{100.*train_correct/train_total:.2f}%'
+            })
+            
             # Clear cache periodically
             if batch_idx % 10 == 0:
                 torch.cuda.empty_cache()
-            
-        # Print training stats
-        print(f'\nEpoch: {epoch}')
-        print(f'Train Loss: {train_loss/len(train_loader):.4f}, '
-              f'Train Acc: {100.*train_correct/train_total:.2f}%')
+        
+        # Validation phase
+        model.eval()
+        val_loss = 0
+        val_correct = 0
+        val_total = 0
+        
+        print("\nRunning validation...")
+        with torch.no_grad():
+            val_pbar = tqdm(val_loader, desc=f'Validation Epoch {epoch+1}/{num_epochs}')
+            for data, target in val_pbar:
+                data, target = data.to(device), target.to(device)
+                output = model(data)
+                loss = criterion(output, target)
+                
+                val_loss += loss.item()
+                _, predicted = output.max(1)
+                val_total += target.size(0)
+                val_correct += predicted.eq(target).sum().item()
+                
+                # Update progress bar
+                val_pbar.set_postfix({
+                    'loss': f'{val_loss/val_total:.4f}',
+                    'acc': f'{100.*val_correct/val_total:.2f}%'
+                })
+        
+        # Calculate epoch statistics
+        train_loss = train_loss / len(train_loader)
+        train_acc = 100. * train_correct / train_total
+        val_loss = val_loss / len(val_loader)
+        val_acc = 100. * val_correct / val_total
+        
+        # Print epoch summary
+        print(f'\nEpoch {epoch+1}/{num_epochs} Summary:')
+        print(f'Training    - Loss: {train_loss:.4f}, Accuracy: {train_acc:.2f}%')
+        print(f'Validation  - Loss: {val_loss:.4f}, Accuracy: {val_acc:.2f}%')
+        
+        # Save best model
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            save_checkpoint(
+                model, optimizer, epoch, val_loss,
+                'checkpoints/best_model.pt'
+            )
+            print(f'New best model saved! (Val Loss: {val_loss:.4f})')
+        
+        # Save regular checkpoint every 5 epochs
+        if (epoch + 1) % 5 == 0:
+            save_checkpoint(
+                model, optimizer, epoch, val_loss,
+                f'checkpoints/model_epoch_{epoch+1}.pt'
+            )
+            print(f'Checkpoint saved for epoch {epoch+1}')
         
         scheduler.step()
-        
-        # Save checkpoint every N epochs
-        if epoch % 5 == 0:
-            save_checkpoint(model, optimizer, epoch, train_loss, f'checkpoints/model_epoch_{epoch}.pt')
+        print(f'Learning rate: {scheduler.get_last_lr()[0]:.6f}')
+        print('-' * 80)
 
 def main():
     # Initialize preprocessing and dataset

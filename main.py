@@ -11,7 +11,7 @@ def main():
     # Configuration
     data_path = 'raw_data'
     batch_size = 2  # Reduced for testing
-    num_epochs = 50
+    num_epochs = 1
     val_split = 0.2  # 20% for validation
     
     print("\n=== Starting Dataset Analysis ===")
