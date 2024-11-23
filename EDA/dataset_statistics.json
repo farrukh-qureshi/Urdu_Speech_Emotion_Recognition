@@ -1,0 +1,93 @@
+{
+    "dataset_summary": {
+        "total_files": 400,
+        "emotion_distribution": {
+            "Angry": {
+                "count": 100,
+                "percentage": 25.0,
+                "avg_duration": 2.4816544217687078
+            },
+            "Happy": {
+                "count": 100,
+                "percentage": 25.0,
+                "avg_duration": 2.5017687074829933
+            },
+            "Neutral": {
+                "count": 100,
+                "percentage": 25.0,
+                "avg_duration": 2.5017687074829933
+            },
+            "Sad": {
+                "count": 100,
+                "percentage": 25.0,
+                "avg_duration": 2.5017687074829933
+            }
+        },
+        "gender_distribution": {
+            "Male": {
+                "count": 344,
+                "percentage": 86.0,
+                "avg_duration": 2.4959215314032592
+            },
+            "Female": {
+                "count": 56,
+                "percentage": 14.000000000000002,
+                "avg_duration": 2.501768707482993
+            }
+        },
+        "duration_statistics": {
+            "min": 0.992108843537415,
+            "max": 3.0035374149659866,
+            "mean": 2.4967401360544215,
+            "std": 0.5067689828225865,
+            "quartiles": {
+                "25%": 2.0,
+                "50%": 2.0,
+                "75%": 3.0035374149659866
+            }
+        },
+        "audio_properties": {
+            "sample_rates": {
+                "44100": 400
+            },
+            "channels": {
+                "1": 400
+            },
+            "bit_depths": {
+                "PCM_16": 400
+            },
+            "avg_file_size_kb": 215.09421875,
+            "audio_features": {
+                "zero_crossings": {
+                    "mean": 4385.9275,
+                    "std": 2943.7383888932372
+                },
+                "rms_energy": {
+                    "mean": 0.09370992332696915,
+                    "std": 0.0627480074763298
+                },
+                "spectral_centroids": {
+                    "mean": 1733.0313453529345,
+                    "std": 649.7341054137412
+                },
+                "spectral_rolloffs": {
+                    "mean": 3343.344850417457,
+                    "std": 1297.4619515244158
+                }
+            }
+        },
+        "speaker_statistics": {
+            "total_speakers": 22,
+            "gender_distribution": {
+                "male": 15,
+                "female": 7
+            },
+            "utterances_per_speaker": {
+                "mean": 18.181818181818183,
+                "median": 5.0,
+                "min": 2.0,
+                "max": 84.0
+            }
+        }
+    }
+}
