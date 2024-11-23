@@ -132,39 +132,48 @@ class WaveformAdapter(nn.Module):
 
 # Main Model
 class UrduClinicalEmotionTransformer(nn.Module):
-    def __init__(self, num_emotions=4):
+    def __init__(self, 
+                 num_emotions=4,
+                 hidden_dim=256,
+                 num_layers=6,
+                 num_heads=4,
+                 ff_expansion=2,
+                 conv_kernel=15,
+                 dropout=0.1):
         super().__init__()
         
+        # Store configuration
+        self.hidden_dim = hidden_dim
+        self.num_layers = num_layers
+        self.num_heads = num_heads
+        self.ff_expansion = ff_expansion
+        
         # Input projection (mel_bins -> hidden_dim)
-        self.input_projection = nn.Linear(80, 512)  # Changed from 301 to 80 mel bins
+        self.input_projection = nn.Linear(80, hidden_dim)
         
         # Conformer-based audio encoder
         self.audio_encoder = nn.ModuleList([
             ConformerBlock(
-                dim=512,
-                num_heads=8,
-                ff_expansion_factor=4,
-                conv_kernel_size=31,
-                dropout=0.1
-            ) for _ in range(12)
+                dim=hidden_dim,
+                num_heads=num_heads,
+                ff_expansion_factor=ff_expansion,
+                conv_kernel_size=conv_kernel,
+                dropout=dropout
+            ) for _ in range(num_layers)
         ])
         
-        # Clinical adapter
-        self.clinical_adapter = WaveformAdapter(
-            hidden_size=512,
-            mask_time_prob=0.05,
-            mask_time_length=10
+        # Simplified clinical adapter
+        self.clinical_adapter = nn.Sequential(
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.GELU(),
+            nn.Dropout(dropout)
         )
         
         # Final classification
-        self.classifier = nn.Linear(512, num_emotions)
+        self.classifier = nn.Linear(hidden_dim, num_emotions)
         
         # Layer norm for input
-        self.input_norm = nn.LayerNorm(512)
-        
-        # Ensure all parameters require gradients
-        for param in self.parameters():
-            param.requires_grad = True
+        self.input_norm = nn.LayerNorm(hidden_dim)
     
     def forward(self, x):
         # x shape: [batch_size, channels, mel_bins, time]
@@ -177,8 +186,8 @@ class UrduClinicalEmotionTransformer(nn.Module):
         x = x.reshape(-1, x.size(-1))  # [batch_size * time, mel_bins]
         
         # Project to hidden dimension
-        features = self.input_projection(x)  # [batch_size * time, hidden_dim]
-        features = features.view(batch_size, time_steps, -1)  # [batch_size, time, hidden_dim]
+        features = self.input_projection(x)
+        features = features.view(batch_size, time_steps, -1)
         features = self.input_norm(features)
         
         # Apply Conformer layers
@@ -186,10 +195,8 @@ class UrduClinicalEmotionTransformer(nn.Module):
             features = layer(features)
         
         # Apply clinical adapter
+        features = torch.mean(features, dim=1)  # Global pooling before adapter
         features = self.clinical_adapter(features)
-        
-        # Global pooling
-        features = torch.mean(features, dim=1)  # [batch_size, hidden_dim]
         
         # Classification
         output = self.classifier(features)

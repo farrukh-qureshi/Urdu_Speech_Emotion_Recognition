@@ -5,6 +5,7 @@ from torch.optim.lr_scheduler import CosineAnnealingLR
 from tqdm import tqdm
 import torch.nn as nn
 import os
+import time
 
 def save_checkpoint(model, optimizer, epoch, loss, path):
     # Create directory if it doesn't exist
@@ -16,7 +17,7 @@ def save_checkpoint(model, optimizer, epoch, loss, path):
         'loss': loss,
     }, path)
 
-def train_model(model, train_loader, val_loader, num_epochs=50, debug=True):
+def train_model(model, train_loader, val_loader, tracker=None, **kwargs):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
     model.train()
@@ -25,7 +26,7 @@ def train_model(model, train_loader, val_loader, num_epochs=50, debug=True):
     optimizer = AdamW(model.parameters(), lr=1e-4)
     criterion = nn.CrossEntropyLoss()
     
-    if debug:
+    if kwargs.get('debug', True):
         print("\nRunning debug checks...")
         try:
             # Enable gradients
@@ -74,19 +75,21 @@ def train_model(model, train_loader, val_loader, num_epochs=50, debug=True):
     
     # Initialize optimizer and scheduler for actual training
     optimizer = AdamW(model.parameters(), lr=1e-4, weight_decay=0.01)
-    scheduler = CosineAnnealingLR(optimizer, T_max=num_epochs)
+    scheduler = CosineAnnealingLR(optimizer, T_max=kwargs.get('num_epochs', 50))
     
     # Training loop
     best_val_loss = float('inf')
     
-    for epoch in range(num_epochs):
+    for epoch in range(kwargs.get('num_epochs', 50)):
+        epoch_start_time = time.time()
+        
         # Training phase
         model.train()
         train_loss = 0
         train_correct = 0
         train_total = 0
         
-        train_pbar = tqdm(train_loader, desc=f'Training Epoch {epoch+1}/{num_epochs}')
+        train_pbar = tqdm(train_loader, desc=f'Training Epoch {epoch+1}/{kwargs.get("num_epochs", 50)}')
         for batch_idx, (data, target) in enumerate(train_pbar):
             data, target = data.to(device), target.to(device)
             
@@ -120,7 +123,7 @@ def train_model(model, train_loader, val_loader, num_epochs=50, debug=True):
         
         print("\nRunning validation...")
         with torch.no_grad():
-            val_pbar = tqdm(val_loader, desc=f'Validation Epoch {epoch+1}/{num_epochs}')
+            val_pbar = tqdm(val_loader, desc=f'Validation Epoch {epoch+1}/{kwargs.get("num_epochs", 50)}')
             for data, target in val_pbar:
                 data, target = data.to(device), target.to(device)
                 output = model(data)
@@ -144,7 +147,7 @@ def train_model(model, train_loader, val_loader, num_epochs=50, debug=True):
         val_acc = 100. * val_correct / val_total
         
         # Print epoch summary
-        print(f'\nEpoch {epoch+1}/{num_epochs} Summary:')
+        print(f'\nEpoch {epoch+1}/{kwargs.get("num_epochs", 50)} Summary:')
         print(f'Training    - Loss: {train_loss:.4f}, Accuracy: {train_acc:.2f}%')
         print(f'Validation  - Loss: {val_loss:.4f}, Accuracy: {val_acc:.2f}%')
         
@@ -168,6 +171,19 @@ def train_model(model, train_loader, val_loader, num_epochs=50, debug=True):
         scheduler.step()
         print(f'Learning rate: {scheduler.get_last_lr()[0]:.6f}')
         print('-' * 80)
+        
+        epoch_time = time.time() - epoch_start_time
+        
+        if tracker:
+            tracker.update({
+                'train_loss': train_loss,
+                'train_acc': train_acc,
+                'val_loss': val_loss,
+                'val_acc': val_acc,
+                'lr': scheduler.get_last_lr()[0],
+                'epoch_time': epoch_time
+            })
+            tracker.update_predictions(val_labels, val_preds)
 
 def main():
     # Initialize preprocessing and dataset
