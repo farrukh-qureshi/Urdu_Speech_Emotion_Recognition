@@ -191,6 +191,138 @@ def train_model(model, train_loader, val_loader, tracker=None, **kwargs):
             })
             tracker.update_predictions(val_labels, val_preds)
 
+def add_noise(waveform, snr_db):
+    """Add noise to waveform at specified SNR level"""
+    # Calculate signal power
+    signal_power = waveform.norm(p=2)**2 / waveform.numel()
+    
+    # Calculate noise power based on SNR
+    noise_power = signal_power / (10**(snr_db/10))
+    
+    # Generate noise
+    noise = torch.randn_like(waveform) * (noise_power**0.5)
+    
+    return waveform + noise
+
+def evaluate_snr(model, val_loader, snr_db, device, criterion):
+    """Evaluate model performance at specific SNR level"""
+    model.eval()
+    val_loss = 0
+    val_correct = 0
+    val_total = 0
+    val_preds = []
+    val_labels = []
+    
+    with torch.no_grad():
+        for data, target in tqdm(val_loader, desc=f'Evaluating SNR {snr_db}dB'):
+            # Add noise to the data
+            noisy_data = add_noise(data, snr_db)
+            
+            noisy_data, target = noisy_data.to(device), target.to(device)
+            output = model(noisy_data)
+            loss = criterion(output, target)
+            
+            val_loss += loss.item()
+            _, predicted = output.max(1)
+            val_total += target.size(0)
+            val_correct += predicted.eq(target).sum().item()
+            
+            val_preds.extend(predicted.cpu().numpy())
+            val_labels.extend(target.cpu().numpy())
+    
+    return {
+        'snr': snr_db,
+        'loss': val_loss / len(val_loader),
+        'accuracy': 100. * val_correct / val_total,
+        'predictions': val_preds,
+        'labels': val_labels
+    }
+
+def fine_tune_with_noise(model, train_loader, val_loader, snr_db, **kwargs):
+    """Fine-tune model with noisy data at specified SNR"""
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
+    model.train()
+    
+    optimizer = AdamW(model.parameters(), lr=1e-5)  # Lower learning rate for fine-tuning
+    criterion = nn.CrossEntropyLoss()
+    
+    best_val_loss = float('inf')
+    
+    for epoch in range(kwargs.get('ft_epochs', 10)):
+        # Training phase with noisy data
+        train_loss = 0
+        train_correct = 0
+        train_total = 0
+        
+        train_pbar = tqdm(train_loader, desc=f'Fine-tuning SNR {snr_db}dB - Epoch {epoch+1}')
+        for data, target in train_pbar:
+            # Add noise to the data
+            noisy_data = add_noise(data, snr_db)
+            
+            noisy_data, target = noisy_data.to(device), target.to(device)
+            
+            optimizer.zero_grad()
+            output = model(noisy_data)
+            loss = criterion(output, target)
+            
+            loss.backward()
+            optimizer.step()
+            
+            train_loss += loss.item()
+            _, predicted = output.max(1)
+            train_total += target.size(0)
+            train_correct += predicted.eq(target).sum().item()
+            
+            train_pbar.set_postfix({
+                'loss': f'{train_loss/(train_total):.4f}',
+                'acc': f'{100.*train_correct/train_total:.2f}%'
+            })
+    
+    return model
+
+def noise_robustness_evaluation(base_model, train_loader, val_loader, tracker, **kwargs):
+    """Evaluate and fine-tune model across multiple SNR levels"""
+    snr_levels = [20, 15, 10, 5, 0]  # SNR levels in dB
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    criterion = nn.CrossEntropyLoss()
+    
+    # Results storage
+    base_results = {}
+    ft_results = {}
+    
+    # Evaluate base model on each SNR level
+    print("\nEvaluating base model across SNR levels...")
+    for snr in snr_levels:
+        results = evaluate_snr(base_model, val_loader, snr, device, criterion)
+        base_results[snr] = results
+    
+    # Fine-tune and evaluate for each SNR level
+    print("\nFine-tuning and evaluating for each SNR level...")
+    for snr in snr_levels:
+        # Create a copy of the base model for this SNR level
+        ft_model = type(base_model)(**kwargs.get('model_config', {}))
+        ft_model.load_state_dict(base_model.state_dict())
+        
+        # Fine-tune the model
+        print(f"\nFine-tuning for SNR {snr}dB...")
+        ft_model = fine_tune_with_noise(ft_model, train_loader, val_loader, snr, **kwargs)
+        
+        # Evaluate fine-tuned model
+        results = evaluate_snr(ft_model, val_loader, snr, device, criterion)
+        ft_results[snr] = results
+        
+        # Save fine-tuned model
+        save_checkpoint(
+            ft_model, None, 0, results['loss'],
+            f'checkpoints/ft_model_snr_{snr}db.pt'
+        )
+    
+    # Update tracker with noise robustness results
+    tracker.update_noise_results(base_results, ft_results)
+    
+    return base_results, ft_results
+
 def main():
     # Initialize preprocessing and dataset
     preprocessor = AudioPreprocessor()

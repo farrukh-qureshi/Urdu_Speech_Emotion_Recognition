@@ -3,7 +3,7 @@ import torch
 from stats_analyzer import DatasetAnalyzer
 from audio_preprocessing import AudioPreprocessor
 from models import UrduClinicalEmotionTransformer
-from train import train_model
+from train import train_model, noise_robustness_evaluation
 from torch.utils.data import DataLoader, random_split
 from dataset import UrduEmotionDataset, collate_fn
 import pandas as pd
@@ -11,6 +11,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
 from datetime import datetime
+import json
 
 class ExperimentTracker:
     def __init__(self, output_dir='experiments'):
@@ -103,11 +104,42 @@ class ExperimentTracker:
         report_df = pd.DataFrame(report).transpose()
         report_df.to_csv(os.path.join(self.data_dir, 'classification_report.csv'))
 
+    def update_noise_results(self, base_results, ft_results):
+        """Save and plot noise robustness evaluation results"""
+        # Save results to JSON
+        results = {
+            'base_model': base_results,
+            'fine_tuned': ft_results
+        }
+        
+        with open(os.path.join(self.data_dir, 'noise_robustness.json'), 'w') as f:
+            json.dump(results, f, indent=4)
+        
+        # Plot SNR vs Accuracy curves
+        plt.figure(figsize=(10, 6))
+        snr_levels = sorted(base_results.keys())
+        
+        # Base model accuracy
+        base_acc = [base_results[snr]['accuracy'] for snr in snr_levels]
+        plt.plot(snr_levels, base_acc, 'b-o', label='Base Model')
+        
+        # Fine-tuned model accuracy
+        ft_acc = [ft_results[snr]['accuracy'] for snr in snr_levels]
+        plt.plot(snr_levels, ft_acc, 'r-o', label='Fine-tuned Model')
+        
+        plt.title('Model Performance vs SNR')
+        plt.xlabel('SNR (dB)')
+        plt.ylabel('Accuracy (%)')
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(os.path.join(self.plots_dir, 'snr_performance.png'))
+        plt.close()
+
 def main():
     # Configuration
     data_path = 'raw_data'
-    batch_size = 2  # Reduced for testing
-    num_epochs = 1
+    batch_size = 32  # Reduced for testing
+    num_epochs = 50
     val_split = 0.2  # 20% for validation
     expected_emotions = ['Angry', 'Happy', 'Neutral', 'Sad']
     
@@ -202,29 +234,27 @@ def main():
     print(f"\nTotal parameters: {total_params:,}")
     print(f"Trainable parameters: {trainable_params:,}")
     
-    # Train model
-    print("\nStarting training...")
-    try:
-        train_model(model, train_loader, val_loader, 
-                   num_epochs=num_epochs, debug=True, 
-                   tracker=tracker)
-        
-        # Generate final plots and reports
-        tracker.plot_training_curves()
-        tracker.plot_confusion_matrix(expected_emotions)
-        tracker.save_classification_report(expected_emotions)
-        
-        print("Training completed successfully!")
-        print(f"\nResults saved in: {tracker.output_dir}")
-        
-    except Exception as e:
-        print(f"\nError during training: {str(e)}")
-        import traceback
-        print("\nFull traceback:")
-        traceback.print_exc()
-        return
+    # Train base model
+    print("\nTraining base model...")
+    train_model(model, train_loader, val_loader, 
+               num_epochs=num_epochs, debug=True, 
+               tracker=tracker)
     
-    print("\nExperiment completed successfully!")
+    # Perform noise robustness evaluation
+    print("\nStarting noise robustness evaluation...")
+    base_results, ft_results = noise_robustness_evaluation(
+        model, train_loader, val_loader, 
+        tracker,
+        ft_epochs=5,  # Number of fine-tuning epochs per SNR level
+        model_config={
+            'num_emotions': len(expected_emotions),
+            'hidden_dim': 256,
+            'num_layers': 6
+        }
+    )
+    
+    print("\nNoise robustness evaluation completed!")
+    print(f"Results saved in: {tracker.output_dir}")
 
 if __name__ == "__main__":
     main()
