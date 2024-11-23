@@ -120,6 +120,8 @@ def train_model(model, train_loader, val_loader, tracker=None, **kwargs):
         val_loss = 0
         val_correct = 0
         val_total = 0
+        val_preds = []
+        val_labels = []
         
         print("\nRunning validation...")
         with torch.no_grad():
@@ -133,6 +135,10 @@ def train_model(model, train_loader, val_loader, tracker=None, **kwargs):
                 _, predicted = output.max(1)
                 val_total += target.size(0)
                 val_correct += predicted.eq(target).sum().item()
+                
+                # Collect predictions and labels
+                val_preds.extend(predicted.cpu().numpy())
+                val_labels.extend(target.cpu().numpy())
                 
                 # Update progress bar
                 val_pbar.set_postfix({
