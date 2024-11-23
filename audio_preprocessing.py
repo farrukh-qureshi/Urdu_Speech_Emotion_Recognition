@@ -25,17 +25,23 @@ class AudioPreprocessor:
         self.time_masking = T.TimeMasking(time_mask_param=40)
         self.freq_masking = T.FrequencyMasking(freq_mask_param=20)
     
-    def preprocess(self, audio_path: str, augment: bool = True) -> torch.Tensor:
-        # Load and preprocess audio
-        waveform, sr = torchaudio.load(audio_path)
-        
-        if sr != self.target_sr:
-            resampler = T.Resample(sr, self.target_sr)
-            waveform = resampler(waveform)
-        
-        # Convert to mono if stereo
-        if waveform.shape[0] > 1:
-            waveform = torch.mean(waveform, dim=0, keepdim=True)
+    def preprocess(self, audio_input, augment: bool = True) -> torch.Tensor:
+        """
+        Process either an audio file path or a waveform
+        """
+        if isinstance(audio_input, str):
+            # Load and preprocess audio if path is provided
+            waveform, sr = torchaudio.load(audio_input)
+            if sr != self.target_sr:
+                resampler = T.Resample(sr, self.target_sr)
+                waveform = resampler(waveform)
+            
+            # Convert to mono if stereo
+            if waveform.shape[0] > 1:
+                waveform = torch.mean(waveform, dim=0, keepdim=True)
+        else:
+            # Use the provided waveform directly
+            waveform = audio_input
         
         # Extract mel spectrogram
         mel_spec = self.mel_transform(waveform)  # [1, n_mels, time]
