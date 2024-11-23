@@ -106,8 +106,8 @@ class ExperimentTracker:
 def main():
     # Configuration
     data_path = 'raw_data'
-    batch_size = 2  # Reduced for testing
-    num_epochs = 1
+    batch_size = 32  # Reduced for testing
+    num_epochs = 50
     val_split = 0.2  # 20% for validation
     expected_emotions = ['Angry', 'Happy', 'Neutral', 'Sad']
     
