@@ -34,13 +34,15 @@ class ExperimentTracker:
         self.val_predictions = []
         self.val_targets = []
 
-    def update_metrics(self, epoch, train_loss, train_acc, val_loss, val_acc, lr):
+    def update(self, metrics_dict):
+        """Update metrics from a dictionary of values"""
+        epoch = len(self.metrics['epoch'])
         self.metrics['epoch'].append(epoch)
-        self.metrics['train_loss'].append(train_loss)
-        self.metrics['train_acc'].append(train_acc)
-        self.metrics['val_loss'].append(val_loss)
-        self.metrics['val_acc'].append(val_acc)
-        self.metrics['learning_rate'].append(lr)
+        self.metrics['train_loss'].append(metrics_dict['train_loss'])
+        self.metrics['train_acc'].append(metrics_dict['train_acc'])
+        self.metrics['val_loss'].append(metrics_dict['val_loss'])
+        self.metrics['val_acc'].append(metrics_dict['val_acc'])
+        self.metrics['learning_rate'].append(metrics_dict['lr'])
         
         # Save after each update
         self.save_metrics()
