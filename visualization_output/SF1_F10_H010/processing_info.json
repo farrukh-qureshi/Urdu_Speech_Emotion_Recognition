@@ -1,0 +1,29 @@
+{
+    "file_name": "SF1_F10_H010",
+    "processing_steps": {
+        "raw_audio": {
+            "sampling_rate": 22050,
+            "duration": 3.0035374149659866,
+            "shape": [
+                66228
+            ]
+        },
+        "mel_spectrogram": {
+            "shape": [
+                80,
+                130
+            ],
+            "min_value": -80.0,
+            "max_value": 0.0
+        },
+        "processed_features": {
+            "shape": [
+                1,
+                80,
+                301
+            ],
+            "min_value": -3.2113358974456787,
+            "max_value": 3.088258981704712
+        }
+    }
+}
