@@ -14,11 +14,6 @@ from sklearn.metrics import precision_recall_curve, f1_score, average_precision_
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Set random seed for reproducibility
-torch.manual_seed(42)
-if torch.cuda.is_available():
-    torch.cuda.manual_seed(42)
-
 # Best hyperparameters from tuning
 config = {
     'hidden_dim': 256,
@@ -29,79 +24,15 @@ config = {
     'dropout': 0.1,
     'batch_size': 16,
     'learning_rate': 0.001,
-    'num_epochs': 100,  # Adjust as needed
+    'num_epochs': 100,
     'val_split': 0.2,
     'data_path': 'raw_data'
 }
 
-# Initialize wandb
-wandb.init(
-    project="urdu-clinical-emotion",
-    config=config,
-    name="best_model_training"
-)
-
-# Initialize preprocessing and datasets
-print("\nInitializing preprocessing and datasets...")
-preprocessor = AudioPreprocessor()
-
-# Create full dataset
-full_dataset = UrduEmotionDataset(config['data_path'], preprocessor)
-print(f"Total dataset size: {len(full_dataset)} files")
-
-# Split dataset
-total_size = len(full_dataset)
-val_size = int(total_size * config['val_split'])
-train_size = total_size - val_size
-
-print(f"Splitting dataset: {train_size} training, {val_size} validation")
-train_dataset, val_dataset = random_split(
-    full_dataset, 
-    [train_size, val_size],
-    generator=torch.Generator().manual_seed(42)
-)
-
-# Create data loaders
-train_loader = DataLoader(
-    train_dataset, 
-    batch_size=config['batch_size'],
-    shuffle=True,
-    num_workers=4,
-    collate_fn=collate_fn
-)
-val_loader = DataLoader(
-    val_dataset, 
-    batch_size=config['batch_size'],
-    num_workers=4,
-    collate_fn=collate_fn
-)
-
-# Initialize model with best hyperparameters
-model = UrduClinicalEmotionTransformer(
-    num_emotions=4,  # Angry, Happy, Neutral, Sad
-    hidden_dim=config['hidden_dim'],
-    num_layers=config['num_layers'],
-    num_heads=config['num_heads'],
-    ff_expansion=config['ff_expansion'],
-    conv_kernel=config['conv_kernel'],
-    dropout=config['dropout']
-)
-
-# Move model to GPU if available
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = model.to(device)
-
-# Initialize optimizer
-optimizer = optim.Adam(model.parameters(), lr=config['learning_rate'])
-
-# Loss function
-criterion = nn.CrossEntropyLoss()
-
 class EarlyStopping:
-    def __init__(self, patience=20, min_delta=0.001, mode='min'):
+    def __init__(self, patience=20, min_delta=0.001):
         self.patience = patience
         self.min_delta = min_delta
-        self.mode = mode
         self.counter = 0
         self.best_loss = None
         self.early_stop = False
@@ -121,7 +52,6 @@ class EarlyStopping:
         return self.early_stop
 
 def plot_metrics(metrics, save_dir):
-    # Plot loss curves
     plt.figure(figsize=(12, 5))
     plt.subplot(1, 2, 1)
     plt.plot(metrics['train_loss'], label='Train Loss')
@@ -131,7 +61,6 @@ def plot_metrics(metrics, save_dir):
     plt.ylabel('Loss')
     plt.legend()
     
-    # Plot accuracy curves
     plt.subplot(1, 2, 2)
     plt.plot(metrics['train_acc'], label='Train Acc')
     plt.plot(metrics['val_acc'], label='Val Acc')
@@ -188,12 +117,10 @@ def train_epoch(model, train_loader, optimizer, criterion, device):
         
         total_loss += loss.item()
         
-        # Calculate accuracy
         _, predicted = output.max(1)
         total += target.size(0)
         correct += predicted.eq(target).sum().item()
         
-        # Update progress bar
         progress_bar.set_postfix({
             'loss': total_loss / (batch_idx + 1),
             'acc': 100. * correct / total
@@ -235,8 +162,79 @@ def validate(model, val_loader, criterion, device):
         all_labels
     )
 
-def main():
-    best_val_loss = float('inf')
+def best_model(custom_config=None):
+    """
+    Main training function that can be imported and run
+    
+    Args:
+        custom_config (dict, optional): Override default config with custom values
+    """
+    # Update config with custom values if provided
+    global config
+    if custom_config:
+        config.update(custom_config)
+    
+    # Set device
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    
+    # Initialize preprocessing and datasets
+    print("\nInitializing preprocessing and datasets...")
+    preprocessor = AudioPreprocessor()
+    
+    # Create full dataset
+    full_dataset = UrduEmotionDataset(config['data_path'], preprocessor)
+    print(f"Total dataset size: {len(full_dataset)} files")
+    
+    # Split dataset
+    total_size = len(full_dataset)
+    val_size = int(total_size * config['val_split'])
+    train_size = total_size - val_size
+    
+    print(f"Splitting dataset: {train_size} training, {val_size} validation")
+    train_dataset, val_dataset = random_split(
+        full_dataset, 
+        [train_size, val_size],
+        generator=torch.Generator().manual_seed(42)
+    )
+    
+    # Create data loaders
+    train_loader = DataLoader(
+        train_dataset, 
+        batch_size=config['batch_size'],
+        shuffle=True,
+        num_workers=4,
+        collate_fn=collate_fn
+    )
+    val_loader = DataLoader(
+        val_dataset, 
+        batch_size=config['batch_size'],
+        num_workers=4,
+        collate_fn=collate_fn
+    )
+    
+    # Initialize model with best hyperparameters
+    model = UrduClinicalEmotionTransformer(
+        num_emotions=4,  # Angry, Happy, Neutral, Sad
+        hidden_dim=config['hidden_dim'],
+        num_layers=config['num_layers'],
+        num_heads=config['num_heads'],
+        ff_expansion=config['ff_expansion'],
+        conv_kernel=config['conv_kernel'],
+        dropout=config['dropout']
+    ).to(device)
+    
+    # Initialize optimizer and criterion
+    optimizer = optim.Adam(model.parameters(), lr=config['learning_rate'])
+    criterion = nn.CrossEntropyLoss()
+    
+    # Setup wandb
+    wandb.init(
+        project="urdu-clinical-emotion",
+        config=config,
+        name="best_model_training"
+    )
+    
+    # Create output directory
     output_dir = 'experiments'
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     model_dir = os.path.join(output_dir, f'run_{timestamp}')
@@ -253,6 +251,8 @@ def main():
         'train_loss': [], 'train_acc': [],
         'val_loss': [], 'val_acc': []
     }
+    
+    best_val_loss = float('inf')
     
     for epoch in range(config['num_epochs']):
         print(f'\nEpoch: {epoch+1}/{config["num_epochs"]}')
@@ -313,6 +313,8 @@ def main():
     # Plot final training curves
     plot_metrics(metrics, model_dir)
     print(f"\nTraining completed. Results saved in: {model_dir}")
+    
+    return model, metrics
 
 if __name__ == '__main__':
-    main()
+    best_model()
