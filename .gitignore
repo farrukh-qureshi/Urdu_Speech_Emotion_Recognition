@@ -1,10 +1,2 @@
-raw_data/*
-checkpoints/*raw_data/*
-checkpoints/*
-experiments/*
-wandb/*
-*.pt
-*.pth
-*.ckpt
-__pycache__/
-*.pyc
+raw_data/
+checkpoints/

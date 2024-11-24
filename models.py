@@ -201,4 +201,21 @@ class UrduClinicalEmotionTransformer(nn.Module):
         # Classification
         output = self.classifier(features)
         
-        return output 
+        return output
+
+class OptimizedUrduEmotionTransformer(UrduClinicalEmotionTransformer):
+    """
+    Optimized version of the Urdu Clinical Emotion Transformer with tuned hyperparameters.
+    This model uses the best configuration found through hyperparameter tuning.
+    """
+    def __init__(self, num_emotions=4):
+        # Initialize with the best hyperparameters found through tuning
+        super().__init__(
+            num_emotions=num_emotions,
+            hidden_dim=256,      # Optimized value
+            num_layers=6,        # Optimized value
+            num_heads=2,         # Optimized value
+            ff_expansion=4,      # Optimized value
+            conv_kernel=15,      # Optimized value
+            dropout=0.1          # Optimized value
+        )
