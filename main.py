@@ -2,7 +2,7 @@ import os
 import torch
 from stats_analyzer import DatasetAnalyzer
 from audio_preprocessing import AudioPreprocessor
-from models import UrduClinicalEmotionTransformer
+from models import OptimizedUrduEmotionTransformer
 from train import train_model
 from torch.utils.data import DataLoader, random_split
 from dataset import UrduEmotionDataset, collate_fn
@@ -106,9 +106,9 @@ class ExperimentTracker:
 def main():
     # Configuration
     data_path = 'raw_data'
-    batch_size = 32  # Reduced for testing
-    num_epochs = 50
-    val_split = 0.2  # 20% for validation
+    batch_size = 16
+    num_epochs = 100
+    val_split = 0.2
     expected_emotions = ['Angry', 'Happy', 'Neutral', 'Sad']
     
     # Initialize experiment tracker
@@ -188,9 +188,9 @@ def main():
         collate_fn=collate_fn
     )
     
-    # Initialize model
-    print("Initializing model...")
-    model = UrduClinicalEmotionTransformer(num_emotions=len(expected_emotions))
+    # Initialize model with optimized configuration
+    print("Initializing optimized model...")
+    model = OptimizedUrduEmotionTransformer(num_emotions=len(expected_emotions))
     
     # Print model summary
     print("\nModel Architecture:")

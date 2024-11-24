@@ -136,8 +136,8 @@ class UrduClinicalEmotionTransformer(nn.Module):
                  num_emotions=4,
                  hidden_dim=256,
                  num_layers=6,
-                 num_heads=4,
-                 ff_expansion=2,
+                 num_heads=2,
+                 ff_expansion=4,
                  conv_kernel=15,
                  dropout=0.1):
         super().__init__()
