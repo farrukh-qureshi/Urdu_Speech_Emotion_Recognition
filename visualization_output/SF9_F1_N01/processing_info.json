@@ -1,0 +1,29 @@
+{
+    "file_name": "SF9_F1_N01",
+    "processing_steps": {
+        "raw_audio": {
+            "sampling_rate": 22050,
+            "duration": 2.0,
+            "shape": [
+                44100
+            ]
+        },
+        "mel_spectrogram": {
+            "shape": [
+                80,
+                87
+            ],
+            "min_value": -80.0,
+            "max_value": 0.0
+        },
+        "processed_features": {
+            "shape": [
+                1,
+                80,
+                201
+            ],
+            "min_value": -5.243401050567627,
+            "max_value": 2.4510927200317383
+        }
+    }
+}
