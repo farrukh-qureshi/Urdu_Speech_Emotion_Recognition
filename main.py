@@ -2,7 +2,7 @@ import os
 import torch
 from stats_analyzer import DatasetAnalyzer
 from audio_preprocessing import AudioPreprocessor
-from models import OptimizedUrduEmotionTransformer
+from models import UrduClinicalEmotionTransformer
 from train import train_model
 from torch.utils.data import DataLoader, random_split
 from dataset import UrduEmotionDataset, collate_fn
@@ -189,8 +189,8 @@ def main():
     )
     
     # Initialize model with optimized configuration
-    print("Initializing optimized model...")
-    model = OptimizedUrduEmotionTransformer(num_emotions=len(expected_emotions))
+    print("Initializing model...")
+    model = UrduClinicalEmotionTransformer(num_emotions=len(expected_emotions))
     
     # Print model summary
     print("\nModel Architecture:")
