@@ -6,6 +6,7 @@ from tqdm import tqdm
 import torch.nn as nn
 import os
 import time
+import wandb
 
 def save_checkpoint(model, optimizer, epoch, loss, path):
     # Create directory if it doesn't exist
@@ -76,6 +77,20 @@ def train_model(model, train_loader, val_loader, tracker=None, **kwargs):
     # Initialize optimizer and scheduler for actual training
     optimizer = AdamW(model.parameters(), lr=1e-4, weight_decay=0.01)
     scheduler = CosineAnnealingLR(optimizer, T_max=kwargs.get('num_epochs', 50))
+    
+    # Initialize wandb run
+    wandb.init(
+        project="urdu-emotion-detection",
+        config={
+            "learning_rate": 1e-4,
+            "weight_decay": 0.01,
+            "num_epochs": kwargs.get('num_epochs', 50),
+            "batch_size": train_loader.batch_size,
+            "model_type": model.__class__.__name__,
+        }
+    )
+    # Watch model gradients and parameters
+    wandb.watch(model)
     
     # Training loop
     best_val_loss = float('inf')
@@ -180,6 +195,17 @@ def train_model(model, train_loader, val_loader, tracker=None, **kwargs):
         
         epoch_time = time.time() - epoch_start_time
         
+        # Log metrics to wandb after each epoch
+        wandb.log({
+            "epoch": epoch + 1,
+            "train_loss": train_loss,
+            "train_accuracy": train_acc,
+            "val_loss": val_loss,
+            "val_accuracy": val_acc,
+            "learning_rate": scheduler.get_last_lr()[0],
+            "epoch_time": epoch_time
+        })
+        
         if tracker:
             tracker.update({
                 'train_loss': train_loss,
@@ -190,6 +216,9 @@ def train_model(model, train_loader, val_loader, tracker=None, **kwargs):
                 'epoch_time': epoch_time
             })
             tracker.update_predictions(val_labels, val_preds)
+
+    # Close wandb run
+    wandb.finish()
 
 def main():
     # Initialize preprocessing and dataset
