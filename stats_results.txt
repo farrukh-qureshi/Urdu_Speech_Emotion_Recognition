@@ -1,0 +1,180 @@
+The results provided are from a statistical analysis comparing features derived from audio signals across four emotional states: **Angry, Happy, Neutral, and Sad**. These features include zero crossings, RMS energy, spectral centroids, spectral rolloffs, mel features, and MFCC features. Here's an explanation of the results:
+
+---
+
+### **1. ANOVA Results**
+
+#### **Initial Set (Zero Crossings, RMS Energy, Spectral Features)**
+- **p-values for all features (e.g., zero crossings, RMS energy, spectral centroids, spectral rolloffs) are > 0.05**.
+  - This indicates that there are no statistically significant differences in these features across the emotional states.
+  - For example, the p-value for zero crossings is **0.773**, meaning the differences in this feature across emotions are likely due to chance.
+
+#### **Expanded Set (Basic, Mel, and MFCC Features)**
+- **Basic Features (Zero Crossings, RMS Energy, Spectral Centroid, Spectral Rolloff):**
+  - These have extremely low p-values (e.g., \( 4.03 \times 10^{-23} \) for zero crossings).
+  - This indicates significant differences in these features between emotions, implying their utility in distinguishing emotions.
+
+- **Mel Features:**
+  - The p-value for **mel_mean** is **0.11** (not significant), while **mel_std** and **mel_skewness** show significant differences (\( 1.24 \times 10^{-22} \) and \( 1.33 \times 10^{-64} \), respectively).
+  - This suggests mel statistics like skewness are more discriminative for emotions.
+
+- **MFCC Features:**
+  - Both **MFCC_means** and **MFCC_stds** have very low p-values (\( 3.89 \times 10^{-68} \) and \( 2.99 \times 10^{-5} \), respectively), indicating significant differences between emotions.
+
+---
+
+### **2. Tukey's HSD Results**
+
+- For the **initial set** (e.g., zero crossings, RMS energy):
+  - None of the pairwise comparisons show significant differences. This is reflected in the **p-adj** values (all > 0.05) and the **reject** column (all False).
+  - Example: The mean difference in zero crossings between Angry and Happy is \( -424.47 \), but the p-adj value is \( 0.728 \), meaning it is not significant.
+
+- For the **expanded set** (basic features, mel, MFCC):
+  - Tukey's test was not explicitly included in your output for the expanded set, but significant ANOVA results suggest these features would show meaningful pairwise differences.
+
+---
+
+### **3. Effect Sizes**
+
+Effect size matrices quantify the magnitude of differences between emotions for each feature. Here are the observations:
+
+- **Initial Set Features:**
+  - The effect sizes are generally small (e.g., near-zero for zero crossings and spectral features), consistent with the non-significant ANOVA results.
+  - Example: For zero crossings, the largest effect size is \( 0.154 \) (Angry vs. Happy), which is minimal.
+
+- **Expanded Set Features:**
+  - **Basic Features (RMS Energy, Spectral Centroid, Spectral Rolloff):**
+    - Moderate to large effect sizes (e.g., \( 1.271 \) for Angry vs. Happy in RMS Energy, indicating a noticeable difference).
+  - **MFCC Features:**
+    - Strong effect sizes across comparisons (e.g., \( 2.491 \) for Neutral vs. Sad in MFCC_means).
+  - **Mel Features:**
+    - Mel skewness shows large effects (e.g., \( 2.194 \) for Angry vs. Sad), suggesting it captures emotional differences well.
+
+---
+
+### **4. Summary of Findings**
+
+- **Non-significant Features (Initial Set):**
+  - Zero crossings, RMS energy, and basic spectral features are not reliable indicators for distinguishing emotions in this dataset.
+  
+- **Significant Features (Expanded Set):**
+  - Basic features (e.g., RMS energy, spectral centroid), mel skewness, and MFCC metrics show significant differences across emotions.
+  - These features are likely to be more effective in building machine learning models for emotion classification.
+
+- **Practical Implications:**
+  - While the basic spectral features are useful, mel and MFCC features provide richer, more discriminative information.
+  - Future models should prioritize these significant features (e.g., mel skewness and MFCC_means) for improved emotional classification.
+
+
+
+  Here is a table summarizing the results of the ANOVA and Tukey post-hoc tests for each feature, as well as the corresponding effect sizes:
+
+### ANOVA Results
+
+| Feature                              | F-statistic    | p-value          |
+|--------------------------------------|----------------|------------------|
+| **Zero Crossings**                   | 0.371          | 0.774            |
+| **RMS Energy**                       | 0.600          | 0.615            |
+| **Spectral Centroids**               | 0.498          | 0.684            |
+| **Spectral Roll-offs**               | 0.532          | 0.660            |
+| **Basic Features (Zero Crossings)**  | 41.055         | 4.03e-23         |
+| **Basic Features (RMS Energy)**      | 132.374        | 2.12e-59         |
+| **Basic Features (Spectral Centroid)**| 51.360         | 4.65e-28         |
+| **Basic Features (Spectral Rolloff)** | 45.064         | 4.48e-25         |
+| **Mel Features (Mel Mean)**          | 2.023          | 0.110            |
+| **Mel Features (Mel Std)**           | 40.065         | 1.25e-22         |
+| **Mel Features (Mel Skewness)**      | 148.896        | 1.34e-64         |
+| **MFCC Features (MFCC Means)**       | 160.713        | 3.89e-68         |
+| **MFCC Features (MFCC Stds)**        | 8.104          | 2.99e-05         |
+
+### Tukey HSD Post-Hoc Results
+
+#### Zero Crossings:
+| Group 1   | Group 2   | Mean Diff   | p-value    | Reject |
+|-----------|-----------|-------------|------------|--------|
+| Angry     | Happy     | -424.47     | 0.728      | False  |
+| Angry     | Neutral   | -244.43     | 0.933      | False  |
+| Angry     | Sad       | -164.09     | 0.978      | False  |
+| Happy     | Neutral   | 180.03      | 0.971      | False  |
+| Happy     | Sad       | 260.37      | 0.920      | False  |
+| Neutral   | Sad       | 80.34       | 0.997      | False  |
+
+#### RMS Energy:
+| Group 1   | Group 2   | Mean Diff   | p-value    | Reject |
+|-----------|-----------|-------------|------------|--------|
+| Angry     | Happy     | 0.0019      | 0.996      | False  |
+| Angry     | Neutral   | 0.0092      | 0.710      | False  |
+| Angry     | Sad       | 0.0088      | 0.737      | False  |
+| Happy     | Neutral   | 0.0073      | 0.830      | False  |
+| Happy     | Sad       | 0.0069      | 0.852      | False  |
+| Neutral   | Sad       | -0.0004     | 1.000      | False  |
+
+#### Spectral Centroids:
+| Group 1   | Group 2   | Mean Diff   | p-value    | Reject |
+|-----------|-----------|-------------|------------|--------|
+| Angry     | Happy     | -95.58      | 0.702      | False  |
+| Angry     | Neutral   | -11.33      | 0.999      | False  |
+| Angry     | Sad       | -12.49      | 0.999      | False  |
+| Happy     | Neutral   | 84.24       | 0.777      | False  |
+| Happy     | Sad       | 83.09       | 0.784      | False  |
+| Neutral   | Sad       | -1.16       | 1.000      | False  |
+
+#### Spectral Roll-offs:
+| Group 1   | Group 2   | Mean Diff   | p-value    | Reject |
+|-----------|-----------|-------------|------------|--------|
+| Angry     | Happy     | -157.50     | 0.833      | False  |
+| Angry     | Neutral   | -95.42      | 0.956      | False  |
+| Angry     | Sad       | -226.14     | 0.618      | False  |
+| Happy     | Neutral   | 62.07       | 0.987      | False  |
+| Happy     | Sad       | -68.64      | 0.983      | False  |
+| Neutral   | Sad       | -130.72     | 0.896      | False  |
+
+### Effect Sizes for Basic Features
+
+#### Zero Crossings:
+
+| Group 1   | Group 2   | Effect Size |
+|-----------|-----------|-------------|
+| Angry     | Happy     | 0.1542      |
+| Angry     | Neutral   | 0.0843      |
+| Angry     | Sad       | 0.0549      |
+| Happy     | Neutral   | -0.1542     |
+| Happy     | Sad       | -0.0643     |
+| Neutral   | Sad       | -0.0901     |
+
+#### RMS Energy:
+
+| Group 1   | Group 2   | Effect Size |
+|-----------|-----------|-------------|
+| Angry     | Happy     | -0.0307     |
+| Angry     | Neutral   | -0.1567     |
+| Angry     | Sad       | -0.1438     |
+| Happy     | Neutral   | 0.0307      |
+| Happy     | Sad       | -0.1209     |
+| Neutral   | Sad       | -0.1099     |
+
+#### Spectral Centroids:
+
+| Group 1   | Group 2   | Effect Size |
+|-----------|-----------|-------------|
+| Angry     | Happy     | 0.1516      |
+| Angry     | Neutral   | 0.0174      |
+| Angry     | Sad       | 0.0204      |
+| Happy     | Neutral   | -0.1516     |
+| Happy     | Sad       | -0.1317     |
+| Neutral   | Sad       | -0.1384     |
+
+#### Spectral Roll-offs:
+
+| Group 1   | Group 2   | Effect Size |
+|-----------|-----------|-------------|
+| Angry     | Happy     | 0.1158      |
+| Angry     | Neutral   | 0.0715      |
+| Angry     | Sad       | 0.1704      |
+| Happy     | Neutral   | -0.1158     |
+| Happy     | Sad       | -0.0475     |
+| Neutral   | Sad       | 0.0529      |
+
+---
+
+This table clearly presents the ANOVA and Tukey HSD results, including p-values, which suggest whether there are significant differences between groups for each feature. The effect sizes provide insight into the magnitude of differences between the groups for each feature. Based on the p-values from ANOVA and Tukey tests, none of the features (except for some basic features like zero crossings, RMS energy, and spectral centroid) show significant differences in the post-hoc comparisons.
