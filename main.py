@@ -11,6 +11,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
 from datetime import datetime
+import wandb
 
 class ExperimentTracker:
     def __init__(self, output_dir='experiments'):
@@ -104,6 +105,11 @@ class ExperimentTracker:
         report_df.to_csv(os.path.join(self.data_dir, 'classification_report.csv'))
 
 def main():
+    # Add this near the start of main(), before any wandb operations
+    wandb.login(key='e438bcf19240dd2e6bf1319589461e36be8725ff')
+    # Or better yet, use environment variable:
+    # os.environ['WANDB_API_KEY'] = 'YOUR-API-KEY-HERE'
+    
     # Configuration
     data_path = 'raw_data'
     batch_size = 16
