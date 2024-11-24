@@ -1,0 +1,26 @@
+
+Initializing preprocessing and datasets...
+Total dataset size: 400 files
+Splitting dataset: 320 training, 80 validation
+
+Starting training with device: cpu
+Model directory: experiments/run_20241124_232834
+
+Epoch: 1/100
+Training:  30%|█████▍            | 6/20 [00:21<00:49,  3.56s/it, loss=1.48, acc=33.3]
+Traceback (most recent call last):
+  File "/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/./best-model.py", line 195, in <module>
+    main()
+  File "/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/./best-model.py", line 163, in main
+    train_loss, train_acc = train_epoch(model, train_loader, optimizer, criterion, device)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/./best-model.py", line 111, in train_epoch
+    loss.backward()
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/_tensor.py", line 581, in backward
+    torch.autograd.backward(
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/autograd/__init__.py", line 347, in backward
+    _engine_run_backward(
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/autograd/graph.py", line 825, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

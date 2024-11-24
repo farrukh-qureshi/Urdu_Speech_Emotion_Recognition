@@ -1,0 +1,26 @@
+2024-11-24 23:31:41,769 INFO    MainThread:54609 [wandb_setup.py:_flush():79] Current SDK version is 0.18.7
+2024-11-24 23:31:41,770 INFO    MainThread:54609 [wandb_setup.py:_flush():79] Configure stats pid to 54609
+2024-11-24 23:31:41,770 INFO    MainThread:54609 [wandb_setup.py:_flush():79] Loading settings from /home/farrukhqureshi/.config/wandb/settings
+2024-11-24 23:31:41,770 INFO    MainThread:54609 [wandb_setup.py:_flush():79] Loading settings from /mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/wandb/settings
+2024-11-24 23:31:41,770 INFO    MainThread:54609 [wandb_setup.py:_flush():79] Loading settings from environment variables: {}
+2024-11-24 23:31:41,770 INFO    MainThread:54609 [wandb_setup.py:_flush():79] Applying setup settings: {'mode': None, '_disable_service': None}
+2024-11-24 23:31:41,770 INFO    MainThread:54609 [wandb_setup.py:_flush():79] Inferring run settings from compute environment: {'program_relpath': 'best-model.py', 'program_abspath': '/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/best-model.py', 'program': '/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/./best-model.py'}
+2024-11-24 23:31:41,770 INFO    MainThread:54609 [wandb_setup.py:_flush():79] Applying login settings: {}
+2024-11-24 23:31:41,771 INFO    MainThread:54609 [wandb_init.py:_log_setup():533] Logging user logs to /mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/wandb/run-20241124_233141-pt1ur1si/logs/debug.log
+2024-11-24 23:31:41,771 INFO    MainThread:54609 [wandb_init.py:_log_setup():534] Logging internal logs to /mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/wandb/run-20241124_233141-pt1ur1si/logs/debug-internal.log
+2024-11-24 23:31:41,771 INFO    MainThread:54609 [wandb_init.py:init():619] calling init triggers
+2024-11-24 23:31:41,771 INFO    MainThread:54609 [wandb_init.py:init():626] wandb.init called with sweep_config: {}
+config: {'hidden_dim': 256, 'num_layers': 6, 'num_heads': 2, 'ff_expansion': 4, 'conv_kernel': 15, 'dropout': 0.1, 'batch_size': 16, 'learning_rate': 0.001, 'num_epochs': 100, 'val_split': 0.2, 'data_path': 'raw_data'}
+2024-11-24 23:31:41,771 INFO    MainThread:54609 [wandb_init.py:init():669] starting backend
+2024-11-24 23:31:41,772 INFO    MainThread:54609 [wandb_init.py:init():673] sending inform_init request
+2024-11-24 23:31:41,774 INFO    MainThread:54609 [backend.py:_multiprocessing_setup():104] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-11-24 23:31:41,775 INFO    MainThread:54609 [wandb_init.py:init():686] backend started and connected
+2024-11-24 23:31:41,780 INFO    MainThread:54609 [wandb_init.py:init():781] updated telemetry
+2024-11-24 23:31:41,799 INFO    MainThread:54609 [wandb_init.py:init():814] communicating run to backend with 90.0 second timeout
+2024-11-24 23:31:42,506 INFO    MainThread:54609 [wandb_init.py:init():867] starting run threads in backend
+2024-11-24 23:31:42,727 INFO    MainThread:54609 [wandb_run.py:_console_start():2456] atexit reg
+2024-11-24 23:31:42,728 INFO    MainThread:54609 [wandb_run.py:_redirect():2305] redirect: wrap_raw
+2024-11-24 23:31:42,728 INFO    MainThread:54609 [wandb_run.py:_redirect():2370] Wrapping output streams.
+2024-11-24 23:31:42,728 INFO    MainThread:54609 [wandb_run.py:_redirect():2395] Redirects installed.
+2024-11-24 23:31:42,731 INFO    MainThread:54609 [wandb_init.py:init():911] run started, returning control to user process
+2024-11-24 23:37:32,299 WARNING MsgRouterThr:54609 [router.py:message_loop():75] message_loop has been closed

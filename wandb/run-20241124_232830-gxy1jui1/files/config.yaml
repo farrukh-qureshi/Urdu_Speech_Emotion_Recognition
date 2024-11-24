@@ -1,0 +1,45 @@
+_wandb:
+    value:
+        cli_version: 0.18.7
+        m: []
+        python_version: 3.12.7
+        t:
+            "1":
+                - 1
+                - 55
+            "2":
+                - 1
+                - 55
+            "3":
+                - 13
+                - 16
+                - 23
+                - 55
+            "4": 3.12.7
+            "5": 0.18.7
+            "8":
+                - 5
+            "12": 0.18.7
+            "13": linux-x86_64
+batch_size:
+    value: 16
+conv_kernel:
+    value: 15
+data_path:
+    value: raw_data
+dropout:
+    value: 0.1
+ff_expansion:
+    value: 4
+hidden_dim:
+    value: 256
+learning_rate:
+    value: 0.001
+num_epochs:
+    value: 100
+num_heads:
+    value: 2
+num_layers:
+    value: 6
+val_split:
+    value: 0.2

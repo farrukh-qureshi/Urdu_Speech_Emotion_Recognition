@@ -1,0 +1,87 @@
+
+Initializing preprocessing and datasets...
+Total dataset size: 400 files
+Splitting dataset: 320 training, 80 validation
+
+Starting training with device: cpu
+Model directory: experiments/run_20241124_233143
+
+Epoch: 1/100
+Training: 100%|█████████████████| 20/20 [01:06<00:00,  3.34s/it, loss=1.16, acc=47.8]
+Train Loss: 1.1632 | Train Acc: 47.81%
+Val Loss: 0.8446 | Val Acc: 66.25%
+Validation F1 Score: 0.5922
+Saved new best model with val_loss: 0.8446
+
+Epoch: 2/100
+Training: 100%|█████████████████| 20/20 [01:21<00:00,  4.10s/it, loss=1.04, acc=53.4]
+Train Loss: 1.0421 | Train Acc: 53.44%
+Val Loss: 0.9160 | Val Acc: 57.50%
+Validation F1 Score: 0.5439
+EarlyStopping counter: 1 out of 7
+
+Epoch: 3/100
+Training: 100%|████████████████| 20/20 [01:11<00:00,  3.57s/it, loss=0.839, acc=63.1]
+Train Loss: 0.8392 | Train Acc: 63.12%
+Val Loss: 1.0205 | Val Acc: 65.00%
+Validation F1 Score: 0.6454
+EarlyStopping counter: 2 out of 7
+
+Epoch: 4/100
+Training: 100%|██| 20/20 [01:20<00:00,  4.01s/it, loss=1.07, acc=52.5]
+Train Loss: 1.0682 | Train Acc: 52.50%
+Val Loss: 1.6262 | Val Acc: 37.50%
+Validation F1 Score: 0.3215
+EarlyStopping counter: 3 out of 7
+
+Epoch: 5/100
+Training:  15%|▌   | 3/20 [00:20<01:56,  6.83s/it, loss=1.5, acc=35.4]
+Traceback (most recent call last):
+  File "/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/./best-model.py", line 318, in <module>
+    main()
+  File "/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/./best-model.py", line 261, in main
+    train_loss, train_acc = train_epoch(model, train_loader, optimizer, criterion, device)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/./best-model.py", line 183, in train_epoch
+    output = model(data)
+             ^^^^^^^^^^^
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/models.py", line 195, in forward
+    features = layer(features)
+               ^^^^^^^^^^^^^^^
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/models.py", line 91, in forward
+    x = self.norm3(x + self.conv(x))
+                       ^^^^^^^^^^^^
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/models.py", line 61, in forward
+    x = self.depthwise_conv(x)
+        ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 375, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/farrukhqureshi/anaconda3/envs/torch/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 370, in _conv_forward
+    return F.conv1d(
+           ^^^^^^^^^
+KeyboardInterrupt

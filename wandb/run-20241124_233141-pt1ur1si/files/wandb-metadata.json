@@ -1,0 +1,32 @@
+{
+  "os": "Linux-6.11.7-300.fc41.x86_64-x86_64-with-glibc2.40",
+  "python": "3.12.7",
+  "startedAt": "2024-11-24T18:31:41.775577Z",
+  "program": "/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech/./best-model.py",
+  "codePath": "best-model.py",
+  "git": {
+    "remote": "https://github.com/farrukh-qureshi/Urdu_Speech_Emotion_Recognition.git",
+    "commit": "308f82452823cf3a7e91b8b530da8b6137405319"
+  },
+  "email": "dr.farrukh89@gmail.com",
+  "root": "/mnt/FarrukhFiles/03-Research_Work/Urdu_Speech",
+  "host": "fedora",
+  "username": "farrukhqureshi",
+  "executable": "/home/farrukhqureshi/anaconda3/envs/torch/bin/python",
+  "codePathLocal": "best-model.py",
+  "cpu_count": 10,
+  "cpu_count_logical": 12,
+  "disk": {
+    "/": {
+      "total": "200000143360",
+      "used": "24716259328"
+    }
+  },
+  "memory": {
+    "total": "16377417728"
+  },
+  "cpu": {
+    "count": 10,
+    "countLogical": 12
+  }
+}
