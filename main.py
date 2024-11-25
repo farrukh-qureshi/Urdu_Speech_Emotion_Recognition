@@ -106,7 +106,7 @@ class ExperimentTracker:
 
 def main():
     # Add this near the start of main(), before any wandb operations
-    wandb.login(key='e438bcf19240dd2e6bf1319589461e36be8725ff')
+    wandb.login(key='API_KEY')
     # Or better yet, use environment variable:
     # os.environ['WANDB_API_KEY'] = 'YOUR-API-KEY-HERE'
     
